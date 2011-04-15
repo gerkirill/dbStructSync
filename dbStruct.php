@@ -757,7 +757,7 @@ class dbStructUpdater
 	/**
 	 * Converts string to lowercase and replaces repeated spaces with the single one -
 	 * to be used for the comparison purposes only
-	 * @param <type> $str
+	 * @param string $str string to normaize
 	 */
 	function normalizeString($str)
 	{
