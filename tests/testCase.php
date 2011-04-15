@@ -102,6 +102,26 @@ class dbStructTest extends PHPUnit_Framework_TestCase
 		}
 	}
 
+	public function testGetUpdates()
+	{
+		$struct = new dbStructUpdater();
+		$snippets = array(
+			file_get_contents('left_1.sql'),
+			file_get_contents('right_1.sql'),
+			array_map('rtrim', file('update_1.sql')),
+			//--- data for the next test goes below ---//
+		);
+		for($k=0; $k<count($snippets); $k+=3)
+		{
+			$left = $snippets[$k];
+			$right = $snippets[$k+1];
+			$expected = $snippets[$k+2];
+
+			$result = $struct->getUpdates($left, $right);
+			$this->assertEquals($expected, $result);
+		}
+	}
+
 	protected function delimPosHelper($struct, $snippets, $posMethod)
 	{
 		foreach($snippets as $k=>$snippet)

@@ -117,7 +117,7 @@ class dbStructUpdater
 		$result = $this->getDiffSql($compRes);
 		if ($asString)
 		{
-			$result = implode(";\r\n", $result);
+			$result = implode(";\r\n", $result).';';
 		}
 		return $result;
 	}
