@@ -427,7 +427,8 @@ class dbStructUpdater
 			$inDest= in_array($key, $destKeys);
 			$sourceOrphan = $inSource && !$inDest;
 			$destOrphan = $inDest && !$inSource;
-			$different =  $inSource && $inDest && $destPartsIndexed[$key]!=$sourcePartsIndexed[$key];
+			$different =  $inSource && $inDest && 
+			strcasecmp($this->normalizeString($destPartsIndexed[$key]), $this->normalizeString($sourcePartsIndexed[$key]));
 			if ($sourceOrphan)
 			{
 				$info['source'] = $sourcePartsIndexed[$key];
@@ -460,11 +461,12 @@ class dbStructUpdater
 		$options = $this->config;
 		$result = array('key'=>'', 'line'=>'');
 		$line = rtrim(trim($line), ',');
-		if (preg_match('/^(CREATE TABLE)|(\) ENGINE=)/i', $line))//first or last table definition line
+		if (preg_match('/^(CREATE\s+TABLE)|(\) ENGINE=)/i', $line))//first or last table definition line
 		{
 			return false;
 		}
-		if (preg_match('/^(PRIMARY KEY)|(((UNIQUE )|(FULLTEXT ))?KEY `?\w+`?)/i', $line, $m))//key definition
+		//if (preg_match('/^(PRIMARY KEY)|(((UNIQUE )|(FULLTEXT ))?KEY `?\w+`?)/i', $line, $m))//key definition
+		if (preg_match('/^(PRIMARY\s+KEY)|(((UNIQUE\s+)|(FULLTEXT\s+))?KEY\s+`?\w+`?)/i', $line, $m))//key definition
 		{
 			$key = $m[0];
 		}
@@ -479,17 +481,17 @@ class dbStructUpdater
 		//$key = str_replace('`', '', $key);
 		if (!empty($options['varcharDefaultIgnore']))
 		{
-			$line = preg_replace("/(var)?char\(([0-9]+)\) NOT NULL default ''/i", '$1char($2) NOT NULL', $line);
+			$line = preg_replace("/(var)?char\(([0-9]+)\)\s+NOT\s+NULL\s+default\s+''/i", '$1char($2) NOT NULL', $line);
 		}
 		if (!empty($options['intDefaultIgnore']))
 		{
-			$line = preg_replace("/((?:big)|(?:tiny))?int\(([0-9]+)\) NOT NULL default '0'/i", '$1int($2) NOT NULL', $line);
+			$line = preg_replace("/((?:big)|(?:tiny))?int\(([0-9]+)\)\s+NOT\s+NULL\s+default\s+'0'/i", '$1int($2) NOT NULL', $line);
 		}
 		if (!empty($options['ignoreIncrement']))
 		{
 			$line = preg_replace("/ AUTO_INCREMENT=[0-9]+/i", '', $line);
 		}
-		$result['key'] = $key;
+		$result['key'] = $this->normalizeString($key);
 		$result['line']= $line;
 		return $result;
 	}
@@ -530,7 +532,7 @@ class dbStructUpdater
 				}
 				if (!empty($options['forceIfNotExists']))
 				{
-					$destSql = preg_replace('/(CREATE(?:\s*TEMPORARY)?\s*TABLE\s*)(?:IF NOT EXISTS\s*)?(`?\w+`?)/i', '$1IF NOT EXISTS $2', $destSql);
+					$destSql = preg_replace('/(CREATE(?:\s*TEMPORARY)?\s*TABLE\s*)(?:IF\sNOT\sEXISTS\s*)?(`?\w+`?)/i', '$1IF NOT EXISTS $2', $destSql);
 				}
 				$sqls[] = $destSql;
 			}
@@ -750,5 +752,17 @@ class dbStructUpdater
 		}
 		while($newPos!==false);
 		return $pos;
+	}
+
+	/**
+	 * Converts string to lowercase and replaces repeated spaces with the single one -
+	 * to be used for the comparison purposes only
+	 * @param <type> $str
+	 */
+	function normalizeString($str)
+	{
+		$str = strtolower($str);
+		$str = preg_replace('/\s+/', ' ', $str);
+		return $str;
 	}
 }
