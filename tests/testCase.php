@@ -10,8 +10,12 @@ class dbStructTest extends PHPUnit_Framework_TestCase
 			'1',
 			'where tags like "%weather;news%";',
 			'2',
-			'string without --delimiter at all',
-			''
+			'string without -- delimiter at all',
+			'',
+			'string with; the delimiter -- in the; comment',
+			'1',
+			"string with the delimiter ';in single; quotes;';",
+			'4'
 		);	
 	
 	public function testGetDelimPos()
@@ -128,6 +132,7 @@ class dbStructTest extends PHPUnit_Framework_TestCase
 		{
 			// continue if that's not a snippet element
 			if ( !(($k+1)%2) ) continue;
+			$originalSnippet = $snippet;
 			// get all the delimiter positions using strpos
 			$allPositions = $this->getAllDelimPositions(';', $snippet);
 			$rightPositionNumbers = explode(',', $snippets[$k+1]);
@@ -160,9 +165,8 @@ class dbStructTest extends PHPUnit_Framework_TestCase
 				$detectedPositions[] = $detectedPosition; 
 			}
 			// make sure positions are the same in both cases
-			$this->assertEquals($rightPositions, $detectedPositions);
+			$this->assertEquals($rightPositions, $detectedPositions, 'Failed locating delimiter in the snippet: '.$originalSnippet);
 		}
-		
 	}
 
 	/**
