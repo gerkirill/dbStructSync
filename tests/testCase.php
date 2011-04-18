@@ -71,7 +71,7 @@ class dbStructTest extends PHPUnit_Framework_TestCase
 	{
 		$struct = new dbStructUpdater();
 		$snippets = array(
-			file_get_contents('viewClasses.sql'),
+			$this->getFileContent('viewClasses.sql'),
 			include('viewClassesSplit.php'),
 		);
 		$snippetsCount = 0;
@@ -89,8 +89,8 @@ class dbStructTest extends PHPUnit_Framework_TestCase
 	{
 		$struct = new dbStructUpdater();
 		$snippets = array(
-			file_get_contents('compareSql_1_left.sql'),
-			file_get_contents('compareSql_1_right.sql'),
+			$this->getFileContent('compareSql_1_left.sql'),
+			$this->getFileContent('compareSql_1_right.sql'),
 			array(),
 			//--- data for the next test goes below ---//
 		);
@@ -110,9 +110,9 @@ class dbStructTest extends PHPUnit_Framework_TestCase
 	{
 		$struct = new dbStructUpdater();
 		$snippets = array(
-			file_get_contents('left_1.sql'),
-			file_get_contents('right_1.sql'),
-			array_map('rtrim', file('update_1.sql')),
+			$this->getFileContent('left_1.sql'),
+			$this->getFileContent('right_1.sql'),
+			array_map('rtrim', $this->getFileContent('update_1.sql', true)),
 			//--- data for the next test goes below ---//
 		);
 		for($k=0; $k<count($snippets); $k+=3)
@@ -185,5 +185,12 @@ class dbStructTest extends PHPUnit_Framework_TestCase
 			$offset = $pos+1;
 		}
 		return $positions;
+	}
+	
+	protected function getFileContent($file, $asArray=false)
+	{
+		$path = dirname(__FILE__).'/'.$file;
+		if ($asArray) return file($path);
+		return file_get_contents($path);
 	}
 }
